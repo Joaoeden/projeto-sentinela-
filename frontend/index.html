@@ -1,33 +1,128 @@
 <!DOCTYPE html>
-<html>
-<head>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<div class="container">
-  <h2>🏥 Sistema Hospitalar</h2>
-  <input id="usuario" placeholder="Usuário">
-  <input id="senha" type="password" placeholder="Senha">
-  <button onclick="login()">Entrar</button>
-</div>
+<html lang="pt-BR">
 
-<script>
-function login() {
-  fetch("login", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      usuario: usuario.value,
-      senha: senha.value
-    })
-  })
-  .then(r => r.json())
-  .then(data => {
-    if(data.tipo === "triagem") location.href = "triagem.html";
-    if(data.tipo === "medico") location.href = "medico.html";
-    if(data.tipo === "atendimento") location.href = "atendimento.html";
-  });
-}
-</script>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Sistema Hospitalar</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h2>🏥 Sistema Hospitalar</h2>
+
+    <p>
+      Acesso ao sistema de gestão hospitalar
+    </p>
+
+    <div class="card">
+
+      <h3>Acesso ao sistema</h3>
+
+      <input
+        id="usuario"
+        type="text"
+        placeholder="Usuário"
+        autocomplete="username"
+      >
+
+      <input
+        id="senha"
+        type="password"
+        placeholder="Senha"
+        autocomplete="current-password"
+      >
+
+      <button onclick="login()">
+        Entrar no sistema
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    function login() {
+
+      const usuario =
+        document.getElementById("usuario").value;
+
+      const senha =
+        document.getElementById("senha").value;
+
+
+      if (!usuario || !senha) {
+
+        alert("Preencha o usuário e a senha.");
+
+        return;
+      }
+
+
+      fetch("login", {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          usuario: usuario,
+          senha: senha
+        })
+
+      })
+
+      .then(r => {
+
+        if (!r.ok) {
+          throw new Error("Erro no login");
+        }
+
+        return r.json();
+
+      })
+
+      .then(data => {
+
+        if (data.tipo === "triagem") {
+          location.href = "triagem.html";
+        }
+
+        else if (data.tipo === "medico") {
+          location.href = "medico.html";
+        }
+
+        else if (data.tipo === "atendimento") {
+          location.href = "atendimento.html";
+        }
+
+        else {
+          alert("Usuário ou senha inválidos.");
+        }
+
+      })
+
+      .catch(error => {
+
+        console.error(error);
+
+        alert("Não foi possível conectar ao sistema.");
+
+      });
+
+    }
+
+  </script>
+
 </body>
+
 </html>
