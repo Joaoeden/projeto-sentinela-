@@ -1,64 +1,161 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
+
 <head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Medicações Prescritas</title>
+
   <link rel="stylesheet" href="css/style.css">
+
 </head>
+
 
 <body>
 
-<div class="container">
+  <div class="container">
 
-  <h2>💊 Medicações Prescritas</h2>
+    <h1>💊 Medicações Prescritas</h1>
 
-  <!-- IMPLEMENTADO: local onde a lista de medicações será exibida -->
-  <div id="listaMedicacoes"></div>
+    <p>
+      Consulte as medicações prescritas para os pacientes.
+    </p>
 
-</div>
 
-<script>
+    <div class="card">
 
-// IMPLEMENTADO: busca as consultas salvas e mostra as medicações
-function carregarMedicacoesPrescritas() {
-  fetch("/medicacoes")
-    .then(r => r.json())
-    .then(data => {
-      const div = document.getElementById("listaMedicacoes");
+      <h2>📋 Prescrições</h2>
 
-      div.innerHTML = "";
+      <div id="listaMedicacoes">
 
-      if (data.length === 0) {
-        div.innerHTML = "<p>Nenhuma medicação prescrita.</p>";
-        return;
-      }
+        <p>Carregando medicações...</p>
 
-      data.forEach(c => {
-        div.innerHTML += `
-          <div class="card">
-            <h3>${c.paciente}</h3>
+      </div>
 
-            <p>
-              <b>Medicação:</b>
-              ${c.medicacao}
-            </p>
+    </div>
 
-            <p>
-              <b>Diagnóstico:</b>
-              ${c.diagnostico}
-            </p>
+  </div>
 
-            <p>
-              <b>Observações:</b>
-              ${c.obs || "Nenhuma"}
-            </p>
-          </div>
-        `;
-      });
-    });
-}
 
-carregarMedicacoesPrescritas();
+  <script>
 
-</script>
+    // Busca as medicações prescritas no servidor
+    function carregarMedicacoesPrescritas() {
+
+      fetch("/medicacoes")
+
+        .then(r => {
+
+          if (!r.ok) {
+            throw new Error("Erro ao buscar medicações.");
+          }
+
+          return r.json();
+
+        })
+
+        .then(data => {
+
+          const div =
+            document.getElementById("listaMedicacoes");
+
+          div.innerHTML = "";
+
+
+          // Nenhuma medicação encontrada
+          if (data.length === 0) {
+
+            div.innerHTML = `
+              <div class="card">
+
+                <h3>📭 Nenhuma prescrição encontrada</h3>
+
+                <p>
+                  Ainda não existem medicações prescritas
+                  para exibir no sistema.
+                </p>
+
+              </div>
+            `;
+
+            return;
+          }
+
+
+          // Exibe cada prescrição
+          data.forEach(c => {
+
+            div.innerHTML += `
+
+              <div class="card">
+
+                <h3>👤 ${c.paciente}</h3>
+
+                <p>
+                  <b>💊 Medicação:</b>
+                  ${c.medicacao}
+                </p>
+
+                <p>
+                  <b>🩺 Diagnóstico:</b>
+                  ${c.diagnostico}
+                </p>
+
+                <p>
+                  <b>📝 Observações:</b>
+                  ${c.obs || "Nenhuma"}
+                </p>
+
+                <span class="verde">
+                  Prescrição registrada
+                </span>
+
+              </div>
+
+            `;
+
+          });
+
+        })
+
+        .catch(error => {
+
+          console.error(error);
+
+          document.getElementById("listaMedicacoes").innerHTML = `
+
+            <div class="card">
+
+              <h3>⚠️ Não foi possível carregar</h3>
+
+              <p>
+                O sistema não conseguiu acessar
+                as medicações prescritas.
+              </p>
+
+              <span class="vermelho">
+                Erro de conexão
+              </span>
+
+            </div>
+
+          `;
+
+        });
+
+    }
+
+
+    carregarMedicacoesPrescritas();
+
+  </script>
 
 </body>
+
 </html>
