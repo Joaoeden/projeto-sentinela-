@@ -1,36 +1,106 @@
 <!DOCTYPE html>
-<html>
-<head><link rel="stylesheet" href="style.css"></head>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Atendimento Hospitalar</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
 <body>
-<div class="container">
-<h2>Atendimento</h2>
 
-<input id="nome" placeholder="Nome">
-<input id="cpf" placeholder="CPF">
+  <div class="container">
 
-<select id="tipo">
-  <option>Convenio</option>
-  <option>Particular</option>
-</select>
+    <h1>Atendimento Hospitalar</h1>
 
-<input type="file" id="foto">
+    <p>
+      Cadastro inicial do paciente para encaminhamento à triagem.
+    </p>
 
-<button onclick="cadastrar()">Cadastrar</button>
-</div>
+    <div class="card">
 
-<script>
-function cadastrar(){
- fetch("http://localhost:3000/atendimento",{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body: JSON.stringify({
-    nome: nome.value,
-    cpf: cpf.value,
-    tipo: tipo.value
-  })
- });
- alert("Paciente enviado para triagem");
-}
-</script>
+      <h2>Dados do Paciente</h2>
+
+      <input
+        id="nome"
+        type="text"
+        placeholder="Nome completo"
+        autocomplete="name"
+      >
+
+      <input
+        id="cpf"
+        type="text"
+        placeholder="CPF"
+        maxlength="14"
+      >
+
+      <select id="tipo">
+        <option value="Convenio">Convênio</option>
+        <option value="Particular">Particular</option>
+      </select>
+
+      <input
+        type="file"
+        id="foto"
+        accept="image/*"
+      >
+
+      <button onclick="cadastrar()">
+        Cadastrar e enviar para triagem
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    function cadastrar() {
+
+      fetch("http://localhost:3000/atendimento", {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          nome: document.getElementById("nome").value,
+          cpf: document.getElementById("cpf").value,
+          tipo: document.getElementById("tipo").value
+        })
+      })
+      .then(response => {
+
+        if (!response.ok) {
+          throw new Error("Erro ao cadastrar paciente");
+        }
+
+        return response.json().catch(() => ({}));
+
+      })
+      .then(() => {
+
+        alert("Paciente enviado para triagem");
+
+      })
+      .catch(error => {
+
+        console.error(error);
+
+        alert("Não foi possível enviar o paciente para a triagem.");
+
+      });
+
+    }
+
+  </script>
+
 </body>
+
 </html>
