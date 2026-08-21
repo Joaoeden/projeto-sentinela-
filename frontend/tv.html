@@ -1,194 +1,953 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
   <meta charset="UTF-8">
-  <title>Mídia Indoor - TV</title>
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Sistema Hospitalar - TV</title>
+
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+
+    /* =====================================================
+       RESET
+    ===================================================== */
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+
+    /* =====================================================
+       FUNDO FUTURISTA
+    ===================================================== */
 
     body {
-      background-color: #5c4033;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+
+      min-height: 100vh;
+
       overflow: hidden;
+
+      color: white;
+
+      background:
+        radial-gradient(
+          circle at 15% 20%,
+          rgba(0, 210, 255, 0.22),
+          transparent 30%
+        ),
+
+        radial-gradient(
+          circle at 85% 80%,
+          rgba(87, 108, 255, 0.20),
+          transparent 32%
+        ),
+
+        linear-gradient(
+          135deg,
+          #041725,
+          #06283d 45%,
+          #061a31
+        );
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      position: relative;
     }
+
+
+    /* =====================================================
+       GRID TECNOLÓGICO DE FUNDO
+    ===================================================== */
+
+    body::before {
+
+      content: "";
+
+      position: fixed;
+
+      inset: 0;
+
+      background-image:
+
+        linear-gradient(
+          rgba(0, 190, 255, 0.045) 1px,
+          transparent 1px
+        ),
+
+        linear-gradient(
+          90deg,
+          rgba(0, 190, 255, 0.045) 1px,
+          transparent 1px
+        );
+
+      background-size: 45px 45px;
+
+      pointer-events: none;
+    }
+
+
+    /* =====================================================
+       BRILHOS DO FUNDO
+    ===================================================== */
+
+    body::after {
+
+      content: "";
+
+      position: fixed;
+
+      width: 500px;
+      height: 500px;
+
+      border-radius: 50%;
+
+      background:
+        radial-gradient(
+          circle,
+          rgba(0, 190, 255, 0.08),
+          transparent 70%
+        );
+
+      top: -220px;
+      right: -180px;
+
+      pointer-events: none;
+    }
+
+
+    /* =====================================================
+       CONTAINER PRINCIPAL
+    ===================================================== */
 
     .tv-container {
-      display: flex;
-      width: 95vw;
+
+      width: 94vw;
       height: 90vh;
-      gap: 18px;
+
+      display: grid;
+
+      grid-template-columns: 32% 68%;
+
+      gap: 20px;
+
+      position: relative;
+
+      z-index: 2;
     }
 
-    .left-panel {
-      display: flex;
-      flex-direction: column;
-      width: 35%;
-      gap: 18px;
-    }
 
+    /* =====================================================
+       PAINÉIS
+    ===================================================== */
+
+    .left-panel,
     .right-panel {
+
       display: flex;
+
       flex-direction: column;
-      width: 65%;
-      gap: 18px;
+
+      gap: 20px;
     }
+
+
+    /* =====================================================
+       BOX PRINCIPAL
+    ===================================================== */
 
     .box {
-      background-color: #63d4f4;
-      border: 6px solid #b39b82;
-      border-radius: 15px;
-      padding: 20px;
+
+      position: relative;
+
+      overflow: hidden;
+
+      border-radius: 25px;
+
+      border: 1px solid rgba(102, 221, 255, 0.28);
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(13, 53, 76, 0.88),
+          rgba(5, 31, 50, 0.92)
+        );
+
+      box-shadow:
+
+        0 20px 50px rgba(0, 0, 0, 0.30),
+
+        inset 0 1px 0
+        rgba(255,255,255,0.08),
+
+        0 0 35px
+        rgba(0, 190, 255, 0.05);
+
+      backdrop-filter: blur(15px);
+
       display: flex;
+
       flex-direction: column;
+
       justify-content: center;
+
       align-items: center;
+
       text-align: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+
+      padding: 25px;
     }
+
+
+    /* brilho superior */
+
+    .box::before {
+
+      content: "";
+
+      position: absolute;
+
+      top: 0;
+      left: 8%;
+
+      width: 84%;
+      height: 2px;
+
+      background:
+        linear-gradient(
+          90deg,
+          transparent,
+          #36d9ff,
+          transparent
+        );
+
+      box-shadow:
+        0 0 15px #36d9ff;
+    }
+
+
+    /* brilho interno */
+
+    .box::after {
+
+      content: "";
+
+      position: absolute;
+
+      width: 180px;
+      height: 180px;
+
+      right: -100px;
+      bottom: -100px;
+
+      border-radius: 50%;
+
+      background:
+        radial-gradient(
+          circle,
+          rgba(0, 208, 255, 0.12),
+          transparent 70%
+        );
+
+      pointer-events: none;
+    }
+
+
+    /* =====================================================
+       TÍTULOS
+    ===================================================== */
 
     .box-title {
-      color: #ffffff;
-      font-size: 2.2vw;
-      font-weight: bold;
+
+      color: #aeeeff;
+
+      font-size: 1.7vw;
+
+      font-weight: 700;
+
+      letter-spacing: 3px;
+
       text-transform: uppercase;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
-      margin-bottom: 12px;
+
+      margin-bottom: 18px;
+
+      text-shadow:
+        0 0 12px rgba(54, 217, 255, 0.35);
     }
 
-    /* Painel esquerdo - local (guichê ou consultório) */
-    .local-box { flex: 1; }
-    .local-number {
-      color: #d12c2c;
-      font-size: 9vw;
-      font-weight: bold;
-      line-height: 1;
-    }
-    .local-type {
-      color: #555;
-      font-size: 1.8vw;
-      font-weight: bold;
-      margin-top: 6px;
-    }
 
-    /* Histórico */
-    .history-box {
+    /* =====================================================
+       LOCAL
+    ===================================================== */
+
+    .local-box {
+
       flex: 1;
-      justify-content: flex-start;
-      align-items: flex-start;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(0, 130, 180, 0.28),
+          rgba(4, 35, 55, 0.92)
+        );
     }
-    .history-box .box-title { font-size: 1.8vw; align-self: center; }
-    #history-list {
-      list-style: none;
-      width: 100%;
-      color: #d12c2c;
-      font-size: 1.5vw;
-      font-weight: bold;
+
+
+    .local-number {
+
+      color: #ffffff;
+
+      font-size: 8vw;
+
+      font-weight: 800;
+
+      line-height: 1;
+
+      text-shadow:
+
+        0 0 15px rgba(47, 221, 255, 0.65),
+
+        0 0 40px rgba(47, 221, 255, 0.25);
+    }
+
+
+    .local-type {
+
+      color: #54dcff;
+
+      font-size: 1.7vw;
+
+      font-weight: 700;
+
+      margin-top: 10px;
+
+      letter-spacing: 3px;
+
+      text-transform: uppercase;
+    }
+
+
+    /* =====================================================
+       HISTÓRICO
+    ===================================================== */
+
+    .history-box {
+
+      flex: 1.25;
+
+      justify-content: flex-start;
+
+      align-items: stretch;
+
       text-align: left;
     }
+
+
+    .history-box .box-title {
+
+      font-size: 1.35vw;
+
+      text-align: center;
+    }
+
+
+    #history-list {
+
+      list-style: none;
+
+      width: 100%;
+
+      color: #d8f7ff;
+
+      font-size: 1.25vw;
+
+      font-weight: 600;
+
+      text-align: left;
+    }
+
+
     #history-list li {
-      margin-bottom: 8px;
-      border-bottom: 1px solid rgba(0,0,0,0.1);
-      padding-bottom: 5px;
+
+      padding: 13px 15px;
+
+      margin-bottom: 9px;
+
+      border-radius: 12px;
+
+      background:
+        rgba(0, 173, 220, 0.07);
+
+      border:
+        1px solid rgba(72, 212, 255, 0.12);
+
+      color: #d9f7ff;
+
+      transition: 0.2s ease;
     }
 
-    /* Painel direito - nome do paciente */
-    .patient-box { flex: 3; }
+
+    #history-list li::before {
+
+      content: "●";
+
+      color: #36d9ff;
+
+      margin-right: 10px;
+
+      text-shadow:
+        0 0 8px #36d9ff;
+    }
+
+
+    /* =====================================================
+       PACIENTE
+    ===================================================== */
+
+    .patient-box {
+
+      flex: 3;
+
+      background:
+        radial-gradient(
+          circle at center,
+          rgba(0, 196, 255, 0.13),
+          transparent 60%
+        ),
+
+        linear-gradient(
+          145deg,
+          rgba(8, 52, 76, 0.94),
+          rgba(4, 27, 46, 0.96)
+        );
+    }
+
+
+    .patient-box .box-title {
+
+      color: #70e5ff;
+
+      font-size: 1.5vw;
+    }
+
+
     .patient-name {
-      color: #d12c2c;
-      font-size: 6.5vw;
-      font-weight: bold;
-      line-height: 1.2;
+
+      max-width: 95%;
+
+      color: #ffffff;
+
+      font-size: 6vw;
+
+      font-weight: 800;
+
+      line-height: 1.15;
+
       word-break: break-word;
+
+      text-shadow:
+
+        0 0 15px
+        rgba(255,255,255,0.30),
+
+        0 0 45px
+        rgba(40,213,255,0.22);
+
+      transition:
+        transform 0.3s ease;
     }
 
-    /* Logo */
-    .logo-box { flex: 1; }
+
+    /* =====================================================
+       LOGO
+    ===================================================== */
+
+    .logo-box {
+
+      flex: 1;
+
+      background:
+        linear-gradient(
+          135deg,
+          rgba(0, 153, 204, 0.20),
+          rgba(44, 72, 160, 0.22)
+        );
+    }
+
+
     .logo-text {
-      color: #8c3b7a;
-      font-size: 3.5vw;
-      font-weight: bold;
-      text-transform: uppercase;
+
+      color: #ffffff;
+
+      font-size: 2.5vw;
+
+      font-weight: 800;
+
+      letter-spacing: 1px;
+
+      text-shadow:
+
+        0 0 12px
+        rgba(48, 219, 255, 0.45);
     }
 
-    /* Animação de flash quando chama */
+
+    /* =====================================================
+       ÍCONE MÉDICO DO LOGO
+    ===================================================== */
+
+    .logo-text:first-letter {
+
+      text-shadow:
+        0 0 15px #36d9ff;
+    }
+
+
+    /* =====================================================
+       FLASH DE NOVA CHAMADA
+    ===================================================== */
+
     @keyframes flash {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-    .flash { animation: flash 0.5s ease 3; }
-  </style>
-</head>
-<body>
 
-<!-- Estrutura da tela da TV criada para exibir o local e o nome do paciente chamado -->
-<div class="tv-container">
-  <div class="left-panel">
-    <div class="box local-box">
-      <div class="box-title" id="local-tipo">GUICHÊ</div>
-      <div class="local-number" id="local-numero">--</div>
-    </div>
-    <div class="box history-box">
-      <div class="box-title">ÚLTIMAS CHAMADAS</div>
-      <ul id="history-list"></ul>
-    </div>
-  </div>
-  <div class="right-panel">
-    <div class="box patient-box">
-      <div class="box-title">PACIENTE</div>
-      <div class="patient-name" id="patient-name">AGUARDANDO...</div>
-    </div>
-    <div class="box logo-box">
-      <div class="logo-text">🏥 Sistema Hospitalar</div>
-    </div>
-  </div>
-</div>
-
-<script>
-let ultimoId = null;
-
-// Função criada para buscar a chamada atual e o histórico da TV em tempo real.
-function atualizar() {
-  fetch("/tv/chamada")
-    .then(r => r.json())
-    .then(data => {
-      const chamada = data.chamada;
-      const historico = data.historico || [];
-
-      if (chamada) {
-        document.getElementById("local-tipo").innerText = chamada.localTipo || "GUICHÊ";
-        document.getElementById("local-numero").innerText = chamada.localNumero || "--";
-        document.getElementById("patient-name").innerText = chamada.paciente || "AGUARDANDO...";
-
-        // Flash visual quando há chamada nova
-        if (chamada.id !== ultimoId) {
-          ultimoId = chamada.id;
-          const patientBox = document.querySelector(".patient-box");
-          patientBox.classList.remove("flash");
-          void patientBox.offsetWidth; // reflow
-          patientBox.classList.add("flash");
-        }
+      0% {
+        transform: scale(1);
+        box-shadow:
+          0 20px 50px rgba(0,0,0,0.30);
       }
 
-      // Histórico
-      const list = document.getElementById("history-list");
-      list.innerHTML = "";
-      historico.slice(0, 4).forEach(h => {
-        const li = document.createElement("li");
-        const tipo = h.localTipo ? h.localTipo.substring(0,4) : "GUIC";
-        li.innerText = `${tipo}. ${h.localNumero} - ${h.paciente}`;
-        list.appendChild(li);
-      });
-    })
-    .catch(err => console.log("Erro ao buscar chamada:", err));
-}
+      30% {
+        transform: scale(1.015);
+        box-shadow:
+          0 0 50px rgba(41,220,255,0.55),
+          0 0 100px rgba(41,220,255,0.25);
+      }
 
-// Polling a cada 2 segundos
-atualizar();
-setInterval(atualizar, 2000);
-</script>
+      60% {
+        transform: scale(1.01);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+
+    }
+
+
+    .flash {
+
+      animation:
+        flash 0.8s ease 3;
+    }
+
+
+    /* =====================================================
+       ANIMAÇÃO DO NOME
+    ===================================================== */
+
+    @keyframes patientAppear {
+
+      0% {
+
+        opacity: 0;
+
+        transform:
+          scale(0.92)
+          translateY(12px);
+
+      }
+
+      100% {
+
+        opacity: 1;
+
+        transform:
+          scale(1)
+          translateY(0);
+
+      }
+
+    }
+
+
+    .patient-name {
+
+      animation:
+        patientAppear 0.5s ease;
+    }
+
+
+    /* =====================================================
+       INDICADOR DE SISTEMA ONLINE
+    ===================================================== */
+
+    .tv-container::after {
+
+      content:
+        "●  SISTEMA ONLINE";
+
+      position: fixed;
+
+      right: 2vw;
+
+      bottom: 1.5vh;
+
+      color: #57e6a5;
+
+      font-size: 0.8vw;
+
+      font-weight: 700;
+
+      letter-spacing: 2px;
+
+      text-shadow:
+        0 0 10px rgba(87,230,165,0.5);
+    }
+
+
+    /* =====================================================
+       RESPONSIVIDADE
+    ===================================================== */
+
+    @media (max-width: 900px) {
+
+      .tv-container {
+
+        width: 96vw;
+
+        height: 92vh;
+
+        grid-template-columns: 1fr;
+
+        grid-template-rows: 38% 62%;
+      }
+
+
+      .left-panel {
+
+        flex-direction: row;
+      }
+
+
+      .right-panel {
+
+        flex-direction: column;
+      }
+
+
+      .local-number {
+
+        font-size: 12vw;
+      }
+
+
+      .patient-name {
+
+        font-size: 9vw;
+      }
+
+
+      .box-title {
+
+        font-size: 3vw;
+      }
+
+
+      .local-type {
+
+        font-size: 3vw;
+      }
+
+
+      #history-list {
+
+        font-size: 2.2vw;
+      }
+
+
+      .logo-text {
+
+        font-size: 4vw;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+  <!-- =====================================================
+       TELA PRINCIPAL
+  ===================================================== -->
+
+  <div class="tv-container">
+
+
+    <!-- ===================================================
+         PAINEL ESQUERDO
+    =================================================== -->
+
+    <div class="left-panel">
+
+
+      <!-- LOCAL -->
+
+      <div class="box local-box">
+
+        <div
+          class="box-title"
+          id="local-tipo"
+        >
+          GUICHÊ
+        </div>
+
+
+        <div
+          class="local-number"
+          id="local-numero"
+        >
+          --
+        </div>
+
+
+        <div class="local-type">
+          AGUARDANDO CHAMADA
+        </div>
+
+      </div>
+
+
+      <!-- HISTÓRICO -->
+
+      <div class="box history-box">
+
+        <div class="box-title">
+          ÚLTIMAS CHAMADAS
+        </div>
+
+
+        <ul id="history-list"></ul>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         PAINEL DIREITO
+    =================================================== -->
+
+    <div class="right-panel">
+
+
+      <!-- PACIENTE -->
+
+      <div class="box patient-box">
+
+        <div class="box-title">
+          PACIENTE
+        </div>
+
+
+        <div
+          class="patient-name"
+          id="patient-name"
+        >
+          AGUARDANDO...
+        </div>
+
+      </div>
+
+
+      <!-- LOGO -->
+
+      <div class="box logo-box">
+
+        <div class="logo-text">
+          🏥 Sistema Hospitalar
+        </div>
+
+      </div>
+
+    </div>
+
+
+  </div>
+
+
+  <script>
+
+
+    /* =====================================================
+       CONTROLE DA ÚLTIMA CHAMADA
+    ===================================================== */
+
+    let ultimoId = null;
+
+
+    /* =====================================================
+       ATUALIZAR TV
+    ===================================================== */
+
+    function atualizar() {
+
+      fetch("/tv/chamada")
+
+        .then(r => r.json())
+
+        .then(data => {
+
+          const chamada =
+            data.chamada;
+
+          const historico =
+            data.historico || [];
+
+
+          /* ===============================================
+             CHAMADA ATUAL
+          =============================================== */
+
+          if (chamada) {
+
+            document.getElementById(
+              "local-tipo"
+            ).innerText =
+              chamada.localTipo ||
+              "GUICHÊ";
+
+
+            document.getElementById(
+              "local-numero"
+            ).innerText =
+              chamada.localNumero ||
+              "--";
+
+
+            document.getElementById(
+              "patient-name"
+            ).innerText =
+              chamada.paciente ||
+              "AGUARDANDO...";
+
+
+            /* Nova chamada */
+
+            if (
+              chamada.id !==
+              ultimoId
+            ) {
+
+              ultimoId =
+                chamada.id;
+
+
+              const patientBox =
+                document.querySelector(
+                  ".patient-box"
+                );
+
+
+              patientBox.classList.remove(
+                "flash"
+              );
+
+
+              void patientBox.offsetWidth;
+
+
+              patientBox.classList.add(
+                "flash"
+              );
+
+            }
+
+          }
+
+
+          /* ===============================================
+             HISTÓRICO
+          =============================================== */
+
+          const list =
+            document.getElementById(
+              "history-list"
+            );
+
+
+          list.innerHTML = "";
+
+
+          historico
+            .slice(0, 4)
+            .forEach(h => {
+
+              const li =
+                document.createElement(
+                  "li"
+                );
+
+
+              const tipo =
+                h.localTipo
+                  ? h.localTipo.substring(0, 4)
+                  : "GUIC";
+
+
+              li.innerText =
+                `${tipo}. ${h.localNumero} - ${h.paciente}`;
+
+
+              list.appendChild(li);
+
+            });
+
+        })
+
+        .catch(err => {
+
+          console.log(
+            "Erro ao buscar chamada:",
+            err
+          );
+
+        });
+
+    }
+
+
+    /* =====================================================
+       INICIALIZAÇÃO
+    ===================================================== */
+
+    atualizar();
+
+
+    /* Atualização em tempo real */
+
+    setInterval(
+      atualizar,
+      2000
+    );
+
+
+  </script>
+
 
 </body>
+
 </html>
