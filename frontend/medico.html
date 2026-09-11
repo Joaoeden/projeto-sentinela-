@@ -32,7 +32,7 @@
 
 
     <!-- =================================================
-         CONTROLE DO CONSULTÓRIO
+         CONSULTÓRIO
     ================================================== -->
 
     <div class="card">
@@ -44,6 +44,7 @@
         na chamada do paciente.
       </p>
 
+
       <input
         type="text"
         id="consultorio-num"
@@ -52,22 +53,26 @@
         placeholder="Número do consultório"
       >
 
+
       <button
         onclick="window.open('tv.html','_blank')"
       >
+
         📺 Abrir Tela da TV
+
       </button>
 
     </div>
 
 
     <!-- =================================================
-         FILA DE PACIENTES
+         FILA
     ================================================== -->
 
     <div class="card">
 
       <h2>👥 Pacientes na Triagem</h2>
+
 
       <div id="triagens">
 
@@ -81,12 +86,15 @@
 
 
     <!-- =================================================
-         ÁREA DA CONSULTA
+         CONSULTA
     ================================================== -->
 
     <div class="card">
 
       <h2>🩺 Consulta</h2>
+
+
+      <!-- PACIENTE -->
 
       <input
         id="paciente"
@@ -95,11 +103,15 @@
       >
 
 
+      <!-- DIAGNÓSTICO -->
+
       <input
         id="diagnostico"
         placeholder="Diagnóstico"
       >
 
+
+      <!-- MEDICAÇÃO -->
 
       <select id="medicacao">
 
@@ -110,22 +122,96 @@
       </select>
 
 
+      <!-- OBSERVAÇÕES -->
+
       <textarea
         id="obs"
         placeholder="Observações médicas"
       ></textarea>
 
 
-      <!-- SALVAR -->
+      <!-- =================================================
+           MOTIVO DA ALTA
+      ================================================== -->
 
-      <button onclick="salvar()">
+      <label for="motivoAlta">
+
+        <b>🏥 Motivo da alta / saída</b>
+
+      </label>
+
+
+      <select id="motivoAlta">
+
+        <option value="">
+
+          Selecione o motivo da alta/saída
+
+        </option>
+
+
+        <option value="Alta médica">
+
+          Alta médica
+
+        </option>
+
+
+        <option value="Encaminhamento">
+
+          Encaminhamento
+
+        </option>
+
+
+        <option value="Transferência">
+
+          Transferência
+
+        </option>
+
+
+        <option value="Retorno para casa">
+
+          Retorno para casa
+
+        </option>
+
+
+        <option value="Outro">
+
+          Outro
+
+        </option>
+
+      </select>
+
+
+      <!-- JUSTIFICATIVA -->
+
+      <textarea
+        id="justificativaAlta"
+        placeholder="Especifique o motivo da alta/saída do paciente"
+      ></textarea>
+
+
+      <!-- =================================================
+           SALVAR
+      ================================================== -->
+
+      <button
+        id="btnSalvar"
+        onclick="salvar()"
+      >
 
         💾 Salvar Consulta
 
       </button>
 
 
-      <!-- BAIXAR PDF -->
+      <!-- =================================================
+           PDF
+      ================================================== -->
 
       <button
         id="btnPDF"
@@ -193,9 +279,9 @@
           div.innerHTML = "";
 
 
-          // ---------------------------------------------
+          // =================================================
           // FILA VAZIA
-          // ---------------------------------------------
+          // =================================================
 
           if (data.length === 0) {
 
@@ -223,25 +309,34 @@
           }
 
 
-          // ---------------------------------------------
-          // LISTA
-          // ---------------------------------------------
+          // =================================================
+          // LISTAR PACIENTES
+          // =================================================
 
           data.forEach((t, index) => {
+
+
+            const risco =
+              t.risco || "verde";
+
 
             div.innerHTML += `
 
               <div class="card">
 
                 <h3>
-                  👤 ${t.nome}
+                  👤 ${escapeHTML(t.nome)}
                 </h3>
+
 
                 <p>
 
                   <b>🩺 Sintoma:</b>
 
-                  ${t.sintoma || "Não informado"}
+                  ${escapeHTML(
+                    t.sintoma ||
+                    "Não informado"
+                  )}
 
                 </p>
 
@@ -250,7 +345,10 @@
 
                   <b>🌡️ Temperatura:</b>
 
-                  ${t.temperatura || "Não informada"}°C
+                  ${
+                    t.temperatura ||
+                    "Não informada"
+                  }°C
 
                 </p>
 
@@ -262,9 +360,9 @@
                 </p>
 
 
-                <span class="${t.risco}">
+                <span class="${escapeHTML(risco)}">
 
-                  ${t.risco}
+                  ${escapeHTML(risco)}
 
                 </span>
 
@@ -273,7 +371,10 @@
 
                   <b>⚠️ Alergia:</b>
 
-                  ${t.alergia || "Nenhuma"}
+                  ${escapeHTML(
+                    t.alergia ||
+                    "Nenhuma"
+                  )}
 
                 </p>
 
@@ -282,25 +383,32 @@
 
                   <b>📝 Observação:</b>
 
-                  ${t.observacao || "Nenhuma"}
+                  ${escapeHTML(
+                    t.observacao ||
+                    "Nenhuma"
+                  )}
 
                 </p>
 
+
+                <!-- CHAMAR NA TV -->
+
+                <button
+                  onclick="chamarNaTV(${index})"
+                >
+
+                  📺 Chamar na TV
+
+                </button>
+
+
+                <!-- ATENDER -->
 
                 <button
                   onclick="selecionar(${index})"
                 >
 
                   🩺 Atender paciente
-
-                </button>
-
-
-                <button
-                  onclick="chamarNaTV('${t.nome.replace(/'/g, "\\'")}')"
-                >
-
-                  📺 Chamar na TV
 
                 </button>
 
@@ -346,15 +454,47 @@
 
 
     // =====================================================
+    // PROTEGER TEXTO HTML
+    // =====================================================
+
+    function escapeHTML(text) {
+
+      const div =
+        document.createElement("div");
+
+      div.textContent =
+        text ?? "";
+
+      return div.innerHTML;
+
+    }
+
+
+    // =====================================================
     // CHAMAR PACIENTE NA TV
     // =====================================================
 
-    function chamarNaTV(nome) {
+    function chamarNaTV(index) {
+
+      const t =
+        triagensCarregadas[index];
+
+
+      if (!t) {
+
+        alert(
+          "Paciente não encontrado."
+        );
+
+        return;
+
+      }
+
 
       const consultorio =
         document.getElementById(
           "consultorio-num"
-        ).value || "01";
+        ).value.trim() || "01";
 
 
       fetch("/tv/chamar", {
@@ -370,11 +510,14 @@
 
         body: JSON.stringify({
 
-          localTipo: "CONSULTÓRIO",
+          localTipo:
+            "CONSULTÓRIO",
 
-          localNumero: consultorio,
+          localNumero:
+            consultorio,
 
-          paciente: nome
+          paciente:
+            t.nome
 
         })
 
@@ -398,11 +541,11 @@
 
         alert(
 
-          "✅ " +
-          nome +
-          " foi chamado na TV para o Consultório " +
-          consultorio +
-          "!"
+          "📺 " +
+          t.nome +
+          " foi chamado na TV.\n\n" +
+          "Consultório: " +
+          consultorio
 
         );
 
@@ -431,9 +574,17 @@
         triagensCarregadas[index];
 
 
+      if (!t) {
+
+        return;
+
+      }
+
+
       document.getElementById(
         "paciente"
-      ).value = t.nome;
+      ).value =
+        t.nome;
 
 
       document.getElementById(
@@ -442,7 +593,7 @@
         t.observacao || "";
 
 
-      // Limpa consulta anterior
+      // Limpar campos anteriores
 
       document.getElementById(
         "diagnostico"
@@ -454,7 +605,17 @@
       ).value = "";
 
 
-      // Remove PDF anterior
+      document.getElementById(
+        "motivoAlta"
+      ).value = "";
+
+
+      document.getElementById(
+        "justificativaAlta"
+      ).value = "";
+
+
+      // PDF anterior
 
       ultimaConsultaId = null;
 
@@ -488,7 +649,7 @@
       }
 
 
-      // Leva até consulta
+      // Ir para consulta
 
       document
         .getElementById("paciente")
@@ -581,7 +742,7 @@
       const paciente =
         document.getElementById(
           "paciente"
-        ).value;
+        ).value.trim();
 
 
       const diagnostico =
@@ -602,9 +763,21 @@
         ).value.trim();
 
 
-      // ---------------------------------------------
-      // VALIDAÇÃO
-      // ---------------------------------------------
+      const motivoAlta =
+        document.getElementById(
+          "motivoAlta"
+        ).value;
+
+
+      const justificativaAlta =
+        document.getElementById(
+          "justificativaAlta"
+        ).value.trim();
+
+
+      // =================================================
+      // VALIDAÇÕES
+      // =================================================
 
       if (!paciente) {
 
@@ -639,13 +812,24 @@
       }
 
 
-      // ---------------------------------------------
-      // DESABILITA BOTÃO DURANTE O ENVIO
-      // ---------------------------------------------
+      if (!motivoAlta) {
+
+        alert(
+          "Selecione o motivo da alta/saída."
+        );
+
+        return;
+
+      }
+
+
+      // =================================================
+      // BOTÃO
+      // =================================================
 
       const botao =
-        document.querySelector(
-          'button[onclick="salvar()"]'
+        document.getElementById(
+          "btnSalvar"
         );
 
 
@@ -655,9 +839,9 @@
         "⏳ Salvando...";
 
 
-      // ---------------------------------------------
-      // ENVIA PARA O SERVIDOR
-      // ---------------------------------------------
+      // =================================================
+      // ENVIAR
+      // =================================================
 
       fetch("/consulta", {
 
@@ -672,47 +856,61 @@
 
         body: JSON.stringify({
 
-          paciente: paciente,
+          paciente:
+            paciente,
 
-          diagnostico: diagnostico,
+          diagnostico:
+            diagnostico,
 
-          medicacao: medicacao,
+          medicacao:
+            medicacao,
 
-          obs: obs
+          obs:
+            obs,
+
+          motivoAlta:
+            motivoAlta,
+
+          justificativaAlta:
+            justificativaAlta
 
         })
 
       })
 
-      .then(r => {
+      .then(async r => {
+
+        const data =
+          await r.json();
+
 
         if (!r.ok) {
 
-          return r.json()
-            .then(data => {
-
-              throw new Error(
-                data.erro ||
-                "Erro ao salvar consulta."
-              );
-
-            });
+          throw new Error(
+            data.erro ||
+            "Erro ao salvar consulta."
+          );
 
         }
 
-        return r.json();
+
+        return data;
 
       })
 
       .then(data => {
 
-        // Guarda ID da consulta
+        // =================================================
+        // GUARDAR ID
+        // =================================================
 
         ultimaConsultaId =
           data.consulta.id;
 
 
-        // Libera botão PDF
+        // =================================================
+        // LIBERAR PDF
+        // =================================================
 
         document.getElementById(
           "btnPDF"
@@ -730,9 +928,9 @@
         );
 
 
-        // -----------------------------------------
+        // =================================================
         // LIMPAR CAMPOS
-        // -----------------------------------------
+        // =================================================
 
         document.getElementById(
           "diagnostico"
@@ -749,14 +947,26 @@
         ).value = "";
 
 
-        // Atualizar fila
+        document.getElementById(
+          "motivoAlta"
+        ).value = "";
+
+
+        document.getElementById(
+          "justificativaAlta"
+        ).value = "";
+
+
+        // =================================================
+        // ATUALIZAR FILA
+        // =================================================
 
         carregar();
 
 
-        // -----------------------------------------
+        // =================================================
         // BAIXAR PDF AUTOMATICAMENTE
-        // -----------------------------------------
+        // =================================================
 
         baixarPDF();
 
@@ -809,15 +1019,11 @@
         "/pdf";
 
 
-      // Cria link temporário
-
       const link =
         document.createElement("a");
 
 
       link.href = url;
-
-      link.target = "_blank";
 
       link.download =
         "consulta-" +
@@ -843,7 +1049,7 @@
     carregarMedicacoes();
 
 
-    // Atualiza fila a cada 10 segundos
+    // Atualizar fila
 
     setInterval(
       carregar,
