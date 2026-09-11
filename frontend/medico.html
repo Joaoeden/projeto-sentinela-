@@ -12,7 +12,10 @@
 
   <title>Painel Médico</title>
 
-  <link rel="stylesheet" href="css/style.css">
+  <link
+    rel="stylesheet"
+    href="css/style.css"
+  >
 
 </head>
 
@@ -28,7 +31,9 @@
     </p>
 
 
-    <!-- Controle do consultório -->
+    <!-- =================================================
+         CONTROLE DO CONSULTÓRIO
+    ================================================== -->
 
     <div class="card">
 
@@ -56,7 +61,9 @@
     </div>
 
 
-    <!-- Fila de pacientes -->
+    <!-- =================================================
+         FILA DE PACIENTES
+    ================================================== -->
 
     <div class="card">
 
@@ -73,7 +80,9 @@
     </div>
 
 
-    <!-- Área da consulta -->
+    <!-- =================================================
+         ÁREA DA CONSULTA
+    ================================================== -->
 
     <div class="card">
 
@@ -85,10 +94,12 @@
         readonly
       >
 
+
       <input
         id="diagnostico"
         placeholder="Diagnóstico"
       >
+
 
       <select id="medicacao">
 
@@ -98,14 +109,36 @@
 
       </select>
 
+
       <textarea
         id="obs"
         placeholder="Observações médicas"
       ></textarea>
 
+
+      <!-- SALVAR -->
+
       <button onclick="salvar()">
+
         💾 Salvar Consulta
+
       </button>
+
+
+      <!-- BAIXAR PDF -->
+
+      <button
+        id="btnPDF"
+        onclick="baixarPDF()"
+        disabled
+      >
+
+        📄 Baixar Consulta em PDF
+
+      </button>
+
+
+      <p id="statusPDF"></p>
 
     </div>
 
@@ -115,16 +148,18 @@
   <script>
 
 
-    /* =====================================================
-       VARIÁVEIS
-    ===================================================== */
+    // =====================================================
+    // VARIÁVEIS
+    // =====================================================
 
     let triagensCarregadas = [];
 
+    let ultimaConsultaId = null;
 
-    /* =====================================================
-       CARREGAR TRIAGENS
-    ===================================================== */
+
+    // =====================================================
+    // CARREGAR TRIAGENS
+    // =====================================================
 
     function carregar() {
 
@@ -133,7 +168,11 @@
         .then(r => {
 
           if (!r.ok) {
-            throw new Error("Erro ao carregar triagens.");
+
+            throw new Error(
+              "Erro ao carregar triagens."
+            );
+
           }
 
           return r.json();
@@ -144,13 +183,19 @@
 
           triagensCarregadas = data;
 
+
           const div =
-            document.getElementById("triagens");
+            document.getElementById(
+              "triagens"
+            );
+
 
           div.innerHTML = "";
 
 
-          /* Nenhum paciente */
+          // ---------------------------------------------
+          // FILA VAZIA
+          // ---------------------------------------------
 
           if (data.length === 0) {
 
@@ -174,10 +219,13 @@
             `;
 
             return;
+
           }
 
 
-          /* Lista de pacientes */
+          // ---------------------------------------------
+          // LISTA
+          // ---------------------------------------------
 
           data.forEach((t, index) => {
 
@@ -190,45 +238,70 @@
                 </h3>
 
                 <p>
+
                   <b>🩺 Sintoma:</b>
+
                   ${t.sintoma || "Não informado"}
+
                 </p>
 
+
                 <p>
+
                   <b>🌡️ Temperatura:</b>
+
                   ${t.temperatura || "Não informada"}°C
+
                 </p>
 
+
                 <p>
+
                   <b>🚨 Classificação de risco:</b>
+
                 </p>
+
 
                 <span class="${t.risco}">
+
                   ${t.risco}
+
                 </span>
 
-                <p>
-                  <b>⚠️ Alergia:</b>
-                  ${t.alergia || "Nenhuma"}
-                </p>
 
                 <p>
+
+                  <b>⚠️ Alergia:</b>
+
+                  ${t.alergia || "Nenhuma"}
+
+                </p>
+
+
+                <p>
+
                   <b>📝 Observação:</b>
+
                   ${t.observacao || "Nenhuma"}
+
                 </p>
 
 
                 <button
                   onclick="selecionar(${index})"
                 >
+
                   🩺 Atender paciente
+
                 </button>
 
 
                 <button
-                  onclick="chamarNaTV('${t.nome}')"
+                  onclick="chamarNaTV('${t.nome.replace(/'/g, "\\'")}')"
                 >
+
                   📺 Chamar na TV
+
                 </button>
 
               </div>
@@ -243,11 +316,16 @@
 
           console.error(error);
 
-          document.getElementById("triagens").innerHTML = `
+
+          document.getElementById(
+            "triagens"
+          ).innerHTML = `
 
             <div class="card">
 
-              <h3>⚠️ Erro ao carregar a fila</h3>
+              <h3>
+                ⚠️ Erro ao carregar a fila
+              </h3>
 
               <p>
                 Não foi possível obter os pacientes
@@ -267,14 +345,16 @@
     }
 
 
-    /* =====================================================
-       CHAMAR PACIENTE NA TV
-    ===================================================== */
+    // =====================================================
+    // CHAMAR PACIENTE NA TV
+    // =====================================================
 
     function chamarNaTV(nome) {
 
       const consultorio =
-        document.getElementById("consultorio-num").value || "01";
+        document.getElementById(
+          "consultorio-num"
+        ).value || "01";
 
 
       fetch("/tv/chamar", {
@@ -282,7 +362,10 @@
         method: "POST",
 
         headers: {
-          "Content-Type": "application/json"
+
+          "Content-Type":
+            "application/json"
+
         },
 
         body: JSON.stringify({
@@ -300,7 +383,11 @@
       .then(r => {
 
         if (!r.ok) {
-          throw new Error("Erro ao chamar paciente.");
+
+          throw new Error(
+            "Erro ao chamar paciente."
+          );
+
         }
 
         return r.json();
@@ -310,11 +397,13 @@
       .then(() => {
 
         alert(
+
           "✅ " +
           nome +
           " foi chamado na TV para o Consultório " +
           consultorio +
           "!"
+
         );
 
       })
@@ -332,9 +421,9 @@
     }
 
 
-    /* =====================================================
-       SELECIONAR PACIENTE
-    ===================================================== */
+    // =====================================================
+    // SELECIONAR PACIENTE
+    // =====================================================
 
     function selecionar(index) {
 
@@ -342,44 +431,81 @@
         triagensCarregadas[index];
 
 
-      document.getElementById("paciente").value =
-        t.nome;
+      document.getElementById(
+        "paciente"
+      ).value = t.nome;
 
 
-      document.getElementById("obs").value =
+      document.getElementById(
+        "obs"
+      ).value =
         t.observacao || "";
 
 
-      /* Alerta de alergia */
+      // Limpa consulta anterior
+
+      document.getElementById(
+        "diagnostico"
+      ).value = "";
+
+
+      document.getElementById(
+        "medicacao"
+      ).value = "";
+
+
+      // Remove PDF anterior
+
+      ultimaConsultaId = null;
+
+
+      document.getElementById(
+        "btnPDF"
+      ).disabled = true;
+
+
+      document.getElementById(
+        "statusPDF"
+      ).textContent = "";
+
+
+      // Alerta de alergia
 
       if (
+
         t.alergia &&
         t.alergia !== "Nenhuma"
+
       ) {
 
         alert(
+
           "⚠️ Paciente possui alergia: " +
           t.alergia
+
         );
 
       }
 
 
-      /* Leva o médico até a consulta */
+      // Leva até consulta
 
       document
         .getElementById("paciente")
         .scrollIntoView({
+
           behavior: "smooth",
+
           block: "center"
+
         });
 
     }
 
 
-    /* =====================================================
-       CARREGAR MEDICAÇÕES
-    ===================================================== */
+    // =====================================================
+    // CARREGAR MEDICAÇÕES
+    // =====================================================
 
     function carregarMedicacoes() {
 
@@ -388,9 +514,11 @@
         .then(r => {
 
           if (!r.ok) {
+
             throw new Error(
               "Erro ao carregar medicações."
             );
+
           }
 
           return r.json();
@@ -400,13 +528,17 @@
         .then(data => {
 
           const select =
-            document.getElementById("medicacao");
+            document.getElementById(
+              "medicacao"
+            );
 
 
           select.innerHTML = `
 
             <option value="">
+
               Selecione a medicação
+
             </option>
 
           `;
@@ -415,7 +547,9 @@
           data.forEach(med => {
 
             const option =
-              document.createElement("option");
+              document.createElement(
+                "option"
+              );
 
 
             option.value = med;
@@ -438,31 +572,55 @@
     }
 
 
-    /* =====================================================
-       SALVAR CONSULTA
-    ===================================================== */
+    // =====================================================
+    // SALVAR CONSULTA
+    // =====================================================
 
     function salvar() {
 
       const paciente =
-        document.getElementById("paciente").value;
+        document.getElementById(
+          "paciente"
+        ).value;
+
 
       const diagnostico =
-        document.getElementById("diagnostico").value;
+        document.getElementById(
+          "diagnostico"
+        ).value.trim();
+
 
       const medicacao =
-        document.getElementById("medicacao").value;
+        document.getElementById(
+          "medicacao"
+        ).value;
+
 
       const obs =
-        document.getElementById("obs").value;
+        document.getElementById(
+          "obs"
+        ).value.trim();
 
 
-      /* Validação */
+      // ---------------------------------------------
+      // VALIDAÇÃO
+      // ---------------------------------------------
 
       if (!paciente) {
 
         alert(
           "Selecione um paciente clicando em Atender."
+        );
+
+        return;
+
+      }
+
+
+      if (!diagnostico) {
+
+        alert(
+          "Informe o diagnóstico."
         );
 
         return;
@@ -481,25 +639,46 @@
       }
 
 
-      /* Envia consulta */
+      // ---------------------------------------------
+      // DESABILITA BOTÃO DURANTE O ENVIO
+      // ---------------------------------------------
+
+      const botao =
+        document.querySelector(
+          'button[onclick="salvar()"]'
+        );
+
+
+      botao.disabled = true;
+
+      botao.textContent =
+        "⏳ Salvando...";
+
+
+      // ---------------------------------------------
+      // ENVIA PARA O SERVIDOR
+      // ---------------------------------------------
 
       fetch("/consulta", {
 
         method: "POST",
 
         headers: {
-          "Content-Type": "application/json"
+
+          "Content-Type":
+            "application/json"
+
         },
 
         body: JSON.stringify({
 
-          paciente,
+          paciente: paciente,
 
-          diagnostico,
+          diagnostico: diagnostico,
 
-          medicacao,
+          medicacao: medicacao,
 
-          obs
+          obs: obs
 
         })
 
@@ -508,23 +687,52 @@
       .then(r => {
 
         if (!r.ok) {
-          throw new Error(
-            "Erro ao salvar consulta."
-          );
+
+          return r.json()
+            .then(data => {
+
+              throw new Error(
+                data.erro ||
+                "Erro ao salvar consulta."
+              );
+
+            });
+
         }
 
         return r.json();
 
       })
 
-      .then(() => {
+      .then(data => {
+
+        // Guarda ID da consulta
+
+        ultimaConsultaId =
+          data.consulta.id;
+
+
+        // Libera botão PDF
+
+        document.getElementById(
+          "btnPDF"
+        ).disabled = false;
+
+
+        document.getElementById(
+          "statusPDF"
+        ).textContent =
+          "✅ Consulta salva. PDF disponível.";
+
 
         alert(
           "✅ Consulta salva com sucesso!"
         );
 
 
-        /* Limpa formulário */
+        // -----------------------------------------
+        // LIMPAR CAMPOS
+        // -----------------------------------------
 
         document.getElementById(
           "diagnostico"
@@ -541,9 +749,16 @@
         ).value = "";
 
 
-        /* Atualiza fila */
+        // Atualizar fila
 
         carregar();
+
+
+        // -----------------------------------------
+        // BAIXAR PDF AUTOMATICAMENTE
+        // -----------------------------------------
+
+        baixarPDF();
 
       })
 
@@ -551,31 +766,89 @@
 
         console.error(error);
 
+
         alert(
+          error.message ||
           "Não foi possível salvar a consulta."
         );
+
+      })
+
+      .finally(() => {
+
+        botao.disabled = false;
+
+        botao.textContent =
+          "💾 Salvar Consulta";
 
       });
 
     }
 
 
-    /* =====================================================
-       INICIALIZAÇÃO
-    ===================================================== */
+    // =====================================================
+    // BAIXAR PDF
+    // =====================================================
+
+    function baixarPDF() {
+
+      if (!ultimaConsultaId) {
+
+        alert(
+          "Salve uma consulta primeiro."
+        );
+
+        return;
+
+      }
+
+
+      const url =
+        "/consulta/" +
+        ultimaConsultaId +
+        "/pdf";
+
+
+      // Cria link temporário
+
+      const link =
+        document.createElement("a");
+
+
+      link.href = url;
+
+      link.target = "_blank";
+
+      link.download =
+        "consulta-" +
+        ultimaConsultaId +
+        ".pdf";
+
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      document.body.removeChild(link);
+
+    }
+
+
+    // =====================================================
+    // INICIALIZAÇÃO
+    // =====================================================
 
     carregar();
 
     carregarMedicacoes();
 
 
-    /* Atualiza a fila a cada 10 segundos */
+    // Atualiza fila a cada 10 segundos
 
     setInterval(
       carregar,
       10000
     );
-
 
   </script>
 
