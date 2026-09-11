@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -31,9 +32,9 @@
     </p>
 
 
-    <!-- =================================================
+    <!-- ==================================================
          CONSULTÓRIO
-    ================================================== -->
+    =================================================== -->
 
     <div class="card">
 
@@ -44,7 +45,6 @@
         na chamada do paciente.
       </p>
 
-
       <input
         type="text"
         id="consultorio-num"
@@ -53,26 +53,20 @@
         placeholder="Número do consultório"
       >
 
-
-      <button
-        onclick="window.open('tv.html','_blank')"
-      >
-
+      <button onclick="abrirTV()">
         📺 Abrir Tela da TV
-
       </button>
 
     </div>
 
 
-    <!-- =================================================
+    <!-- ==================================================
          FILA
-    ================================================== -->
+    =================================================== -->
 
     <div class="card">
 
       <h2>👥 Pacientes na Triagem</h2>
-
 
       <div id="triagens">
 
@@ -85,33 +79,41 @@
     </div>
 
 
-    <!-- =================================================
+    <!-- ==================================================
          CONSULTA
-    ================================================== -->
+    =================================================== -->
 
     <div class="card">
 
       <h2>🩺 Consulta</h2>
 
 
-      <!-- PACIENTE -->
+      <label>
+        Paciente
+      </label>
 
       <input
+        type="text"
         id="paciente"
         placeholder="Paciente selecionado"
         readonly
       >
 
 
-      <!-- DIAGNÓSTICO -->
+      <label>
+        Diagnóstico
+      </label>
 
       <input
+        type="text"
         id="diagnostico"
-        placeholder="Diagnóstico"
+        placeholder="Digite o diagnóstico"
       >
 
 
-      <!-- MEDICAÇÃO -->
+      <label>
+        Medicação
+      </label>
 
       <select id="medicacao">
 
@@ -122,7 +124,9 @@
       </select>
 
 
-      <!-- OBSERVAÇÕES -->
+      <label>
+        Observações médicas
+      </label>
 
       <textarea
         id="obs"
@@ -130,101 +134,9 @@
       ></textarea>
 
 
-      <!-- =================================================
-           MOTIVO DA ALTA
-      ================================================== -->
-
-      <label for="motivoAlta">
-
-        <b>🏥 Motivo da alta / saída</b>
-
-      </label>
-
-
-      <select id="motivoAlta">
-
-        <option value="">
-
-          Selecione o motivo da alta/saída
-
-        </option>
-
-
-        <option value="Alta médica">
-
-          Alta médica
-
-        </option>
-
-
-        <option value="Encaminhamento">
-
-          Encaminhamento
-
-        </option>
-
-
-        <option value="Transferência">
-
-          Transferência
-
-        </option>
-
-
-        <option value="Retorno para casa">
-
-          Retorno para casa
-
-        </option>
-
-
-        <option value="Outro">
-
-          Outro
-
-        </option>
-
-      </select>
-
-
-      <!-- JUSTIFICATIVA -->
-
-      <textarea
-        id="justificativaAlta"
-        placeholder="Especifique o motivo da alta/saída do paciente"
-      ></textarea>
-
-
-      <!-- =================================================
-           SALVAR
-      ================================================== -->
-
-      <button
-        id="btnSalvar"
-        onclick="salvar()"
-      >
-
+      <button onclick="salvarConsulta()">
         💾 Salvar Consulta
-
       </button>
-
-
-      <!-- =================================================
-           PDF
-      ================================================== -->
-
-      <button
-        id="btnPDF"
-        onclick="baixarPDF()"
-        disabled
-      >
-
-        📄 Baixar Consulta em PDF
-
-      </button>
-
-
-      <p id="statusPDF"></p>
 
     </div>
 
@@ -233,27 +145,56 @@
 
   <script>
 
-
-    // =====================================================
-    // VARIÁVEIS
-    // =====================================================
+    /* ==================================================
+       VARIÁVEIS
+    ================================================== */
 
     let triagensCarregadas = [];
 
-    let ultimaConsultaId = null;
+    let pacienteSelecionado = null;
 
 
-    // =====================================================
-    // CARREGAR TRIAGENS
-    // =====================================================
+    /* ==================================================
+       ABRIR TV
+    ================================================== */
+
+    function abrirTV() {
+
+      window.open(
+        "tv.html",
+        "_blank"
+      );
+
+    }
+
+
+    /* ==================================================
+       ESCAPAR HTML
+    ================================================== */
+
+    function escaparHTML(texto) {
+
+      return String(texto ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    }
+
+
+    /* ==================================================
+       CARREGAR TRIAGENS
+    ================================================== */
 
     function carregar() {
 
       fetch("/triagens")
 
-        .then(r => {
+        .then(response => {
 
-          if (!r.ok) {
+          if (!response.ok) {
 
             throw new Error(
               "Erro ao carregar triagens."
@@ -261,7 +202,7 @@
 
           }
 
-          return r.json();
+          return response.json();
 
         })
 
@@ -269,31 +210,28 @@
 
           triagensCarregadas = data;
 
-
           const div =
-            document.getElementById(
-              "triagens"
-            );
-
+            document.getElementById("triagens");
 
           div.innerHTML = "";
 
 
-          // =================================================
-          // FILA VAZIA
-          // =================================================
-
-          if (data.length === 0) {
+          if (
+            !data ||
+            data.length === 0
+          ) {
 
             div.innerHTML = `
 
               <div class="card">
 
-                <h3>📭 Fila vazia</h3>
+                <h3>
+                  📭 Fila vazia
+                </h3>
 
                 <p>
                   Nenhum paciente está aguardando
-                  atendimento no momento.
+                  atendimento.
                 </p>
 
                 <span class="verde">
@@ -309,15 +247,33 @@
           }
 
 
-          // =================================================
-          // LISTAR PACIENTES
-          // =================================================
-
           data.forEach((t, index) => {
+
+            const sintoma =
+              t.sintoma ||
+              t.sintomas ||
+              "Não informado";
+
+
+            const temperatura =
+              t.temperatura ??
+              t.temp ??
+              "";
 
 
             const risco =
-              t.risco || "verde";
+              t.risco ||
+              "verde";
+
+
+            const alergia =
+              t.alergia ||
+              "Nenhuma";
+
+
+            const observacao =
+              t.observacao ||
+              "Nenhuma";
 
 
             div.innerHTML += `
@@ -325,91 +281,56 @@
               <div class="card">
 
                 <h3>
-                  👤 ${escapeHTML(t.nome)}
+                  👤 ${escaparHTML(t.nome)}
                 </h3>
 
 
                 <p>
-
                   <b>🩺 Sintoma:</b>
-
-                  ${escapeHTML(
-                    t.sintoma ||
-                    "Não informado"
-                  )}
-
+                  ${escaparHTML(sintoma)}
                 </p>
 
 
                 <p>
-
                   <b>🌡️ Temperatura:</b>
-
-                  ${
-                    t.temperatura ||
-                    "Não informada"
-                  }°C
-
+                  ${escaparHTML(String(temperatura))}
+                  ${temperatura !== "" ? "°C" : ""}
                 </p>
 
 
                 <p>
-
                   <b>🚨 Classificação de risco:</b>
-
                 </p>
 
 
-                <span class="${escapeHTML(risco)}">
-
-                  ${escapeHTML(risco)}
-
+                <span class="${escaparHTML(risco)}">
+                  ${escaparHTML(risco)}
                 </span>
 
 
                 <p>
-
                   <b>⚠️ Alergia:</b>
-
-                  ${escapeHTML(
-                    t.alergia ||
-                    "Nenhuma"
-                  )}
-
+                  ${escaparHTML(alergia)}
                 </p>
 
 
                 <p>
-
                   <b>📝 Observação:</b>
-
-                  ${escapeHTML(
-                    t.observacao ||
-                    "Nenhuma"
-                  )}
-
+                  ${escaparHTML(observacao)}
                 </p>
 
-
-                <!-- CHAMAR NA TV -->
-
-                <button
-                  onclick="chamarNaTV(${index})"
-                >
-
-                  📺 Chamar na TV
-
-                </button>
-
-
-                <!-- ATENDER -->
 
                 <button
                   onclick="selecionar(${index})"
                 >
-
                   🩺 Atender paciente
+                </button>
 
+
+                <button
+                  onclick="chamarNaTV(${index})"
+                >
+                  📺 Chamar na TV
                 </button>
 
               </div>
@@ -424,7 +345,6 @@
 
           console.error(error);
 
-
           document.getElementById(
             "triagens"
           ).innerHTML = `
@@ -436,13 +356,8 @@
               </h3>
 
               <p>
-                Não foi possível obter os pacientes
-                da triagem.
+                Não foi possível carregar os pacientes.
               </p>
-
-              <span class="vermelho">
-                Erro de conexão
-              </span>
 
             </div>
 
@@ -453,34 +368,103 @@
     }
 
 
-    // =====================================================
-    // PROTEGER TEXTO HTML
-    // =====================================================
+    /* ==================================================
+       SELECIONAR PACIENTE
+    ================================================== */
 
-    function escapeHTML(text) {
+    function selecionar(index) {
 
-      const div =
-        document.createElement("div");
+      const paciente =
+        triagensCarregadas[index];
 
-      div.textContent =
-        text ?? "";
 
-      return div.innerHTML;
+      if (!paciente) {
+
+        alert(
+          "Paciente não encontrado."
+        );
+
+        return;
+
+      }
+
+
+      pacienteSelecionado =
+        paciente;
+
+
+      document.getElementById(
+        "paciente"
+      ).value =
+        paciente.nome;
+
+
+      document.getElementById(
+        "obs"
+      ).value =
+        paciente.observacao || "";
+
+
+      document.getElementById(
+        "diagnostico"
+      ).value = "";
+
+
+      document.getElementById(
+        "medicacao"
+      ).value = "";
+
+
+      if (
+
+        paciente.alergia &&
+
+        paciente.alergia.toLowerCase() !==
+        "nenhuma" &&
+
+        paciente.alergia.toLowerCase() !==
+        "nao" &&
+
+        paciente.alergia.toLowerCase() !==
+        "não"
+
+      ) {
+
+        alert(
+
+          "⚠️ ATENÇÃO!\n\n" +
+          "Paciente possui alergia a:\n\n" +
+          paciente.alergia
+
+        );
+
+      }
+
+
+      document
+        .getElementById("paciente")
+        .scrollIntoView({
+
+          behavior: "smooth",
+
+          block: "center"
+
+        });
 
     }
 
 
-    // =====================================================
-    // CHAMAR PACIENTE NA TV
-    // =====================================================
+    /* ==================================================
+       CHAMAR NA TV
+    ================================================== */
 
     function chamarNaTV(index) {
 
-      const t =
+      const paciente =
         triagensCarregadas[index];
 
 
-      if (!t) {
+      if (!paciente) {
 
         alert(
           "Paciente não encontrado."
@@ -492,9 +476,10 @@
 
 
       const consultorio =
-        document.getElementById(
-          "consultorio-num"
-        ).value.trim() || "01";
+        document
+          .getElementById("consultorio-num")
+          .value
+          .trim() || "01";
 
 
       fetch("/tv/chamar", {
@@ -517,15 +502,15 @@
             consultorio,
 
           paciente:
-            t.nome
+            paciente.nome
 
         })
 
       })
 
-      .then(r => {
+      .then(response => {
 
-        if (!r.ok) {
+        if (!response.ok) {
 
           throw new Error(
             "Erro ao chamar paciente."
@@ -533,7 +518,7 @@
 
         }
 
-        return r.json();
+        return response.json();
 
       })
 
@@ -541,11 +526,11 @@
 
         alert(
 
-          "📺 " +
-          t.nome +
-          " foi chamado na TV.\n\n" +
-          "Consultório: " +
-          consultorio
+          "✅ " +
+          paciente.nome +
+          " foi chamado na TV para o Consultório " +
+          consultorio +
+          "!"
 
         );
 
@@ -556,7 +541,7 @@
         console.error(error);
 
         alert(
-          "Não foi possível chamar o paciente na TV."
+          "❌ Não foi possível chamar o paciente na TV."
         );
 
       });
@@ -564,117 +549,17 @@
     }
 
 
-    // =====================================================
-    // SELECIONAR PACIENTE
-    // =====================================================
-
-    function selecionar(index) {
-
-      const t =
-        triagensCarregadas[index];
-
-
-      if (!t) {
-
-        return;
-
-      }
-
-
-      document.getElementById(
-        "paciente"
-      ).value =
-        t.nome;
-
-
-      document.getElementById(
-        "obs"
-      ).value =
-        t.observacao || "";
-
-
-      // Limpar campos anteriores
-
-      document.getElementById(
-        "diagnostico"
-      ).value = "";
-
-
-      document.getElementById(
-        "medicacao"
-      ).value = "";
-
-
-      document.getElementById(
-        "motivoAlta"
-      ).value = "";
-
-
-      document.getElementById(
-        "justificativaAlta"
-      ).value = "";
-
-
-      // PDF anterior
-
-      ultimaConsultaId = null;
-
-
-      document.getElementById(
-        "btnPDF"
-      ).disabled = true;
-
-
-      document.getElementById(
-        "statusPDF"
-      ).textContent = "";
-
-
-      // Alerta de alergia
-
-      if (
-
-        t.alergia &&
-        t.alergia !== "Nenhuma"
-
-      ) {
-
-        alert(
-
-          "⚠️ Paciente possui alergia: " +
-          t.alergia
-
-        );
-
-      }
-
-
-      // Ir para consulta
-
-      document
-        .getElementById("paciente")
-        .scrollIntoView({
-
-          behavior: "smooth",
-
-          block: "center"
-
-        });
-
-    }
-
-
-    // =====================================================
-    // CARREGAR MEDICAÇÕES
-    // =====================================================
+    /* ==================================================
+       CARREGAR MEDICAÇÕES
+    ================================================== */
 
     function carregarMedicacoes() {
 
       fetch("/lista-medicacoes")
 
-        .then(r => {
+        .then(response => {
 
-          if (!r.ok) {
+          if (!response.ok) {
 
             throw new Error(
               "Erro ao carregar medicações."
@@ -682,7 +567,7 @@
 
           }
 
-          return r.json();
+          return response.json();
 
         })
 
@@ -697,15 +582,13 @@
           select.innerHTML = `
 
             <option value="">
-
               Selecione a medicação
-
             </option>
 
           `;
 
 
-          data.forEach(med => {
+          data.forEach(medicacao => {
 
             const option =
               document.createElement(
@@ -713,12 +596,16 @@
               );
 
 
-            option.value = med;
+            option.value =
+              medicacao;
 
-            option.textContent = med;
+            option.textContent =
+              medicacao;
 
 
-            select.appendChild(option);
+            select.appendChild(
+              option
+            );
 
           });
 
@@ -733,56 +620,43 @@
     }
 
 
-    // =====================================================
-    // SALVAR CONSULTA
-    // =====================================================
+    /* ==================================================
+       SALVAR CONSULTA
+    ================================================== */
 
-    function salvar() {
+    function salvarConsulta() {
 
       const paciente =
-        document.getElementById(
-          "paciente"
-        ).value.trim();
+        document
+          .getElementById("paciente")
+          .value
+          .trim();
 
 
       const diagnostico =
-        document.getElementById(
-          "diagnostico"
-        ).value.trim();
+        document
+          .getElementById("diagnostico")
+          .value
+          .trim();
 
 
       const medicacao =
-        document.getElementById(
-          "medicacao"
-        ).value;
+        document
+          .getElementById("medicacao")
+          .value;
 
 
       const obs =
-        document.getElementById(
-          "obs"
-        ).value.trim();
+        document
+          .getElementById("obs")
+          .value
+          .trim();
 
-
-      const motivoAlta =
-        document.getElementById(
-          "motivoAlta"
-        ).value;
-
-
-      const justificativaAlta =
-        document.getElementById(
-          "justificativaAlta"
-        ).value.trim();
-
-
-      // =================================================
-      // VALIDAÇÕES
-      // =================================================
 
       if (!paciente) {
 
         alert(
-          "Selecione um paciente clicando em Atender."
+          "⚠️ Primeiro selecione um paciente."
         );
 
         return;
@@ -793,7 +667,7 @@
       if (!diagnostico) {
 
         alert(
-          "Informe o diagnóstico."
+          "⚠️ Informe o diagnóstico."
         );
 
         return;
@@ -804,7 +678,7 @@
       if (!medicacao) {
 
         alert(
-          "Selecione uma medicação."
+          "⚠️ Selecione uma medicação."
         );
 
         return;
@@ -812,36 +686,32 @@
       }
 
 
-      if (!motivoAlta) {
+      const dados = {
 
-        alert(
-          "Selecione o motivo da alta/saída."
-        );
+        paciente:
+          paciente,
 
-        return;
+        pacienteId:
+          pacienteSelecionado
+            ? pacienteSelecionado.pacienteId
+            : null,
 
-      }
+        triagemId:
+          pacienteSelecionado
+            ? pacienteSelecionado.id
+            : null,
 
+        diagnostico:
+          diagnostico,
 
-      // =================================================
-      // BOTÃO
-      // =================================================
+        medicacao:
+          medicacao,
 
-      const botao =
-        document.getElementById(
-          "btnSalvar"
-        );
+        obs:
+          obs
 
+      };
 
-      botao.disabled = true;
-
-      botao.textContent =
-        "⏳ Salvando...";
-
-
-      // =================================================
-      // ENVIAR
-      // =================================================
 
       fetch("/consulta", {
 
@@ -854,83 +724,44 @@
 
         },
 
-        body: JSON.stringify({
-
-          paciente:
-            paciente,
-
-          diagnostico:
-            diagnostico,
-
-          medicacao:
-            medicacao,
-
-          obs:
-            obs,
-
-          motivoAlta:
-            motivoAlta,
-
-          justificativaAlta:
-            justificativaAlta
-
-        })
+        body:
+          JSON.stringify(dados)
 
       })
 
-      .then(async r => {
+      .then(response => {
 
-        const data =
-          await r.json();
+        return response.json()
+          .then(data => ({
 
+            ok:
+              response.ok,
 
-        if (!r.ok) {
+            data:
+              data
+
+          }));
+
+      })
+
+      .then(resultado => {
+
+        if (!resultado.ok) {
 
           throw new Error(
-            data.erro ||
+
+            resultado.data.erro ||
             "Erro ao salvar consulta."
+
           );
 
         }
-
-
-        return data;
-
-      })
-
-      .then(data => {
-
-        // =================================================
-        // GUARDAR ID
-        // =================================================
-
-        ultimaConsultaId =
-          data.consulta.id;
-
-
-        // =================================================
-        // LIBERAR PDF
-        // =================================================
-
-        document.getElementById(
-          "btnPDF"
-        ).disabled = false;
-
-
-        document.getElementById(
-          "statusPDF"
-        ).textContent =
-          "✅ Consulta salva. PDF disponível.";
 
 
         alert(
           "✅ Consulta salva com sucesso!"
         );
 
-
-        // =================================================
-        // LIMPAR CAMPOS
-        // =================================================
 
         document.getElementById(
           "diagnostico"
@@ -947,28 +778,16 @@
         ).value = "";
 
 
-        document.getElementById(
-          "motivoAlta"
-        ).value = "";
+        pacienteSelecionado =
+          null;
 
 
         document.getElementById(
-          "justificativaAlta"
+          "paciente"
         ).value = "";
 
-
-        // =================================================
-        // ATUALIZAR FILA
-        // =================================================
 
         carregar();
-
-
-        // =================================================
-        // BAIXAR PDF AUTOMATICAMENTE
-        // =================================================
-
-        baixarPDF();
 
       })
 
@@ -976,80 +795,26 @@
 
         console.error(error);
 
-
         alert(
-          error.message ||
-          "Não foi possível salvar a consulta."
+
+          "❌ Não foi possível salvar a consulta.\n\n" +
+          error.message
+
         );
-
-      })
-
-      .finally(() => {
-
-        botao.disabled = false;
-
-        botao.textContent =
-          "💾 Salvar Consulta";
 
       });
 
     }
 
 
-    // =====================================================
-    // BAIXAR PDF
-    // =====================================================
-
-    function baixarPDF() {
-
-      if (!ultimaConsultaId) {
-
-        alert(
-          "Salve uma consulta primeiro."
-        );
-
-        return;
-
-      }
-
-
-      const url =
-        "/consulta/" +
-        ultimaConsultaId +
-        "/pdf";
-
-
-      const link =
-        document.createElement("a");
-
-
-      link.href = url;
-
-      link.download =
-        "consulta-" +
-        ultimaConsultaId +
-        ".pdf";
-
-
-      document.body.appendChild(link);
-
-      link.click();
-
-      document.body.removeChild(link);
-
-    }
-
-
-    // =====================================================
-    // INICIALIZAÇÃO
-    // =====================================================
+    /* ==================================================
+       INICIALIZAÇÃO
+    ================================================== */
 
     carregar();
 
     carregarMedicacoes();
 
-
-    // Atualizar fila
 
     setInterval(
       carregar,
@@ -1061,3 +826,4 @@
 </body>
 
 </html>
+```
