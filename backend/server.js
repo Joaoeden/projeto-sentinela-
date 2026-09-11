@@ -204,8 +204,6 @@ app.get("/triagens", (req, res) => {
 
   const db = readDB();
 
-  // Mostra somente quem ainda está aguardando médico
-
   const triagensAguardando =
     db.triagens.filter(t =>
       t.status === "aguardando_medico"
@@ -217,7 +215,7 @@ app.get("/triagens", (req, res) => {
 
 
 // =====================================================
-// MÍDIA INDOOR - TV
+// MÍDIA INDOOR - CHAMAR PACIENTE NA TV
 // =====================================================
 
 app.post("/tv/chamar", (req, res) => {
@@ -316,23 +314,23 @@ app.post("/consulta", (req, res) => {
   const db = readDB();
 
   const {
-
     paciente,
     diagnostico,
     medicacao,
-    obs
-
+    obs,
+    motivoAlta,
+    justificativaAlta
   } = req.body;
 
 
-  // Validação
+  // =================================================
+  // VALIDAÇÕES
+  // =================================================
 
   if (!paciente) {
 
     return res.status(400).json({
-
       erro: "Paciente não informado."
-
     });
 
   }
@@ -341,9 +339,7 @@ app.post("/consulta", (req, res) => {
   if (!diagnostico) {
 
     return res.status(400).json({
-
       erro: "Diagnóstico não informado."
-
     });
 
   }
@@ -352,15 +348,24 @@ app.post("/consulta", (req, res) => {
   if (!medicacao) {
 
     return res.status(400).json({
-
       erro: "Medicação não informada."
-
     });
 
   }
 
 
-  // Cria a consulta
+  if (!motivoAlta) {
+
+    return res.status(400).json({
+      erro: "Informe o motivo da alta/saída."
+    });
+
+  }
+
+
+  // =================================================
+  // CRIAR CONSULTA
+  // =================================================
 
   const consulta = {
 
@@ -374,12 +379,19 @@ app.post("/consulta", (req, res) => {
 
     obs: obs || "",
 
+    motivoAlta: motivoAlta,
+
+    justificativaAlta:
+      justificativaAlta || "",
+
     createdAt: new Date()
 
   };
 
 
-  // Salva consulta
+  // =================================================
+  // SALVAR CONSULTA
+  // =================================================
 
   db.consultas.push(consulta);
 
@@ -406,23 +418,30 @@ app.post("/consulta", (req, res) => {
 
 
   // =================================================
-  // ATUALIZAR STATUS DO PACIENTE
+  // ATUALIZAR PACIENTE
   // =================================================
 
-  const pacienteBanco = db.pacientes.find(p =>
-    p.nome === paciente
-  );
+  const pacienteBanco =
+    db.pacientes.find(p =>
+      p.nome === paciente
+    );
 
 
   if (pacienteBanco) {
 
     pacienteBanco.status = "atendido";
 
+    pacienteBanco.atendidoEm = new Date();
+
   }
 
 
   writeDB(db);
 
+
+  // =================================================
+  // RETORNO
+  // =================================================
 
   res.json({
 
@@ -459,9 +478,10 @@ app.get("/consulta/:id", (req, res) => {
   const id = Number(req.params.id);
 
 
-  const consulta = db.consultas.find(c =>
-    c.id === id
-  );
+  const consulta =
+    db.consultas.find(c =>
+      c.id === id
+    );
 
 
   if (!consulta) {
@@ -481,7 +501,7 @@ app.get("/consulta/:id", (req, res) => {
 
 
 // =====================================================
-// GERAR PDF DA CONSULTA
+// GERAR PDF
 // =====================================================
 
 app.get("/consulta/:id/pdf", (req, res) => {
@@ -491,9 +511,10 @@ app.get("/consulta/:id/pdf", (req, res) => {
   const id = Number(req.params.id);
 
 
-  const consulta = db.consultas.find(c =>
-    c.id === id
-  );
+  const consulta =
+    db.consultas.find(c =>
+      c.id === id
+    );
 
 
   if (!consulta) {
@@ -505,13 +526,16 @@ app.get("/consulta/:id/pdf", (req, res) => {
   }
 
 
-  // -------------------------------------------------
-  // CONFIGURAÇÃO DO PDF
-  // -------------------------------------------------
+  // =================================================
+  // CRIAR DOCUMENTO
+  // =================================================
 
   const doc = new PDFDocument({
+
     size: "A4",
+
     margin: 50
+
   });
 
 
@@ -531,8 +555,6 @@ app.get("/consulta/:id/pdf", (req, res) => {
   );
 
 
-  // Envia o PDF diretamente para o navegador
-
   doc.pipe(res);
 
 
@@ -551,26 +573,22 @@ app.get("/consulta/:id/pdf", (req, res) => {
     );
 
 
-  doc
-    .moveDown(0.5);
+  doc.moveDown(0.5);
 
 
   doc
     .fontSize(13)
     .font("Helvetica")
     .text(
-      "Relatório de Consulta Médica",
+      "Relatório de Consulta",
       {
         align: "center"
       }
     );
 
 
-  doc
-    .moveDown(1);
+  doc.moveDown(1);
 
-
-  // Linha
 
   doc
     .moveTo(50, doc.y)
@@ -578,46 +596,47 @@ app.get("/consulta/:id/pdf", (req, res) => {
     .stroke();
 
 
-  doc
-    .moveDown(1);
+  doc.moveDown(1);
 
 
   // =================================================
-  // DADOS DA CONSULTA
+  // INFORMAÇÕES
   // =================================================
 
   doc
     .fontSize(11)
     .font("Helvetica-Bold")
-    .text("ID DA CONSULTA:");
+    .text("ID DA CONSULTA");
 
 
   doc
     .font("Helvetica")
-    .text(String(consulta.id));
+    .text(
+      String(consulta.id)
+    );
 
 
-  doc
-    .moveDown(0.8);
+  doc.moveDown(0.7);
 
 
   doc
     .font("Helvetica-Bold")
-    .text("PACIENTE:");
+    .text("PACIENTE");
 
 
   doc
     .font("Helvetica")
-    .text(consulta.paciente);
+    .text(
+      consulta.paciente
+    );
 
 
-  doc
-    .moveDown(0.8);
+  doc.moveDown(0.7);
 
 
   doc
     .font("Helvetica-Bold")
-    .text("DATA E HORA:");
+    .text("DATA E HORA");
 
 
   doc
@@ -629,8 +648,7 @@ app.get("/consulta/:id/pdf", (req, res) => {
     );
 
 
-  doc
-    .moveDown(1.5);
+  doc.moveDown(1.5);
 
 
   // =================================================
@@ -643,8 +661,7 @@ app.get("/consulta/:id/pdf", (req, res) => {
     .text("Diagnóstico");
 
 
-  doc
-    .moveDown(0.4);
+  doc.moveDown(0.4);
 
 
   doc
@@ -656,8 +673,7 @@ app.get("/consulta/:id/pdf", (req, res) => {
     );
 
 
-  doc
-    .moveDown(1.5);
+  doc.moveDown(1.3);
 
 
   // =================================================
@@ -670,8 +686,7 @@ app.get("/consulta/:id/pdf", (req, res) => {
     .text("Medicação");
 
 
-  doc
-    .moveDown(0.4);
+  doc.moveDown(0.4);
 
 
   doc
@@ -683,8 +698,7 @@ app.get("/consulta/:id/pdf", (req, res) => {
     );
 
 
-  doc
-    .moveDown(1.5);
+  doc.moveDown(1.3);
 
 
   // =================================================
@@ -697,8 +711,7 @@ app.get("/consulta/:id/pdf", (req, res) => {
     .text("Observações");
 
 
-  doc
-    .moveDown(0.4);
+  doc.moveDown(0.4);
 
 
   doc
@@ -710,8 +723,57 @@ app.get("/consulta/:id/pdf", (req, res) => {
     );
 
 
+  doc.moveDown(1.3);
+
+
+  // =================================================
+  // MOTIVO DA ALTA
+  // =================================================
+
   doc
-    .moveDown(3);
+    .fontSize(14)
+    .font("Helvetica-Bold")
+    .text("Motivo da Alta / Saída");
+
+
+  doc.moveDown(0.4);
+
+
+  doc
+    .fontSize(11)
+    .font("Helvetica")
+    .text(
+      consulta.motivoAlta ||
+      "Não informado"
+    );
+
+
+  doc.moveDown(0.8);
+
+
+  // =================================================
+  // JUSTIFICATIVA DA ALTA
+  // =================================================
+
+  doc
+    .fontSize(14)
+    .font("Helvetica-Bold")
+    .text("Justificativa da Alta / Saída");
+
+
+  doc.moveDown(0.4);
+
+
+  doc
+    .fontSize(11)
+    .font("Helvetica")
+    .text(
+      consulta.justificativaAlta ||
+      "Nenhuma justificativa informada."
+    );
+
+
+  doc.moveDown(3);
 
 
   // =================================================
@@ -724,8 +786,7 @@ app.get("/consulta/:id/pdf", (req, res) => {
     .stroke();
 
 
-  doc
-    .moveDown(0.7);
+  doc.moveDown(0.7);
 
 
   doc
@@ -739,16 +800,15 @@ app.get("/consulta/:id/pdf", (req, res) => {
     );
 
 
-  doc
-    .text(
-      "Consulta registrada eletronicamente.",
-      {
-        align: "center"
-      }
-    );
+  doc.text(
+    "Consulta registrada eletronicamente.",
+    {
+      align: "center"
+    }
+  );
 
 
-  // Finaliza PDF
+  // Finaliza
 
   doc.end();
 
