@@ -1,1 +1,667 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Alta Hospitalar</title>
+
+  <link
+    rel="stylesheet"
+    href="css/style.css"
+  >
+
+</head>
+
+
+<body>
+
+  <div class="container">
+
+    <h1>🏥 Alta Hospitalar</h1>
+
+    <p>
+      Gerenciamento da alta e saída dos pacientes.
+    </p>
+
+
+    <!-- ==================================================
+         PACIENTES
+    =================================================== -->
+
+    <div class="card">
+
+      <h2>👥 Pacientes aguardando alta</h2>
+
+      <div id="pacientes">
+
+        <p>
+          Carregando pacientes...
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         FORMULÁRIO DE ALTA
+    =================================================== -->
+
+    <div
+      class="card"
+      id="areaAlta"
+    >
+
+      <h2>📋 Registrar Alta</h2>
+
+
+      <label>
+        Paciente
+      </label>
+
+      <input
+        type="text"
+        id="paciente"
+        readonly
+        placeholder="Selecione um paciente"
+      >
+
+
+      <label>
+        Diagnóstico da consulta
+      </label>
+
+      <input
+        type="text"
+        id="diagnostico"
+        readonly
+      >
+
+
+      <label>
+        Medicação utilizada
+      </label>
+
+      <input
+        type="text"
+        id="medicacao"
+        readonly
+      >
+
+
+      <label>
+        Observações da consulta
+      </label>
+
+      <textarea
+        id="obs"
+        readonly
+      ></textarea>
+
+
+      <!-- ==================================================
+           MOTIVO DA ALTA
+      =================================================== -->
+
+      <label>
+        Motivo da alta / saída
+      </label>
+
+      <select id="motivoAlta">
+
+        <option value="">
+          Selecione o motivo
+        </option>
+
+        <option value="Alta médica">
+          Alta médica
+        </option>
+
+        <option value="Melhora do quadro">
+          Melhora do quadro
+        </option>
+
+        <option value="Tratamento concluído">
+          Tratamento concluído
+        </option>
+
+        <option value="Encaminhamento para outro setor">
+          Encaminhamento para outro setor
+        </option>
+
+        <option value="Transferência para outro hospital">
+          Transferência para outro hospital
+        </option>
+
+        <option value="Internação">
+          Internação
+        </option>
+
+        <option value="Saída a pedido do paciente">
+          Saída a pedido do paciente
+        </option>
+
+        <option value="Outro">
+          Outro
+        </option>
+
+      </select>
+
+
+      <!-- ==================================================
+           JUSTIFICATIVA
+      =================================================== -->
+
+      <label>
+        Justificativa da alta / saída
+      </label>
+
+      <textarea
+        id="justificativaAlta"
+        placeholder="Explique por que o paciente recebeu alta ou saiu do hospital."
+      ></textarea>
+
+
+      <button
+        onclick="registrarAlta()"
+      >
+        🏥 Registrar Alta
+      </button>
+
+
+      <button
+        id="btnPDF"
+        style="display:none;"
+        onclick="baixarPDF()"
+      >
+        📄 Baixar PDF da Alta
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    /* ==================================================
+       VARIÁVEIS
+    ================================================== */
+
+    let consultas = [];
+
+    let consultaSelecionada = null;
+
+    let ultimaAltaId = null;
+
+
+    /* ==================================================
+       CARREGAR CONSULTAS
+    ================================================== */
+
+    function carregarConsultas() {
+
+      fetch("/consultas/alta")
+
+        .then(response => {
+
+          if (!response.ok) {
+
+            throw new Error(
+              "Erro ao carregar pacientes."
+            );
+
+          }
+
+          return response.json();
+
+        })
+
+        .then(data => {
+
+          consultas = data;
+
+          const div =
+            document.getElementById(
+              "pacientes"
+            );
+
+
+          div.innerHTML = "";
+
+
+          if (
+            !data ||
+            data.length === 0
+          ) {
+
+            div.innerHTML = `
+
+              <div class="card">
+
+                <h3>
+                  📭 Nenhum paciente
+                </h3>
+
+                <p>
+                  Não existem pacientes aguardando
+                  registro de alta.
+                </p>
+
+              </div>
+
+            `;
+
+            return;
+
+          }
+
+
+          data.forEach((consulta, index) => {
+
+            div.innerHTML += `
+
+              <div class="card">
+
+                <h3>
+                  👤 ${escaparHTML(consulta.paciente)}
+                </h3>
+
+                <p>
+
+                  <b>
+                    🩺 Diagnóstico:
+                  </b>
+
+                  ${escaparHTML(
+                    consulta.diagnostico ||
+                    "Não informado"
+                  )}
+
+                </p>
+
+
+                <p>
+
+                  <b>
+                    💊 Medicação:
+                  </b>
+
+                  ${escaparHTML(
+                    consulta.medicacao ||
+                    "Não informada"
+                  )}
+
+                </p>
+
+
+                <p>
+
+                  <b>
+                    📝 Observações:
+                  </b>
+
+                  ${escaparHTML(
+                    consulta.obs ||
+                    "Nenhuma"
+                  )}
+
+                </p>
+
+
+                <button
+                  onclick="selecionarConsulta(${index})"
+                >
+
+                  📋 Registrar Alta
+
+                </button>
+
+              </div>
+
+            `;
+
+          });
+
+        })
+
+        .catch(error => {
+
+          console.error(error);
+
+
+          document.getElementById(
+            "pacientes"
+          ).innerHTML = `
+
+            <div class="card">
+
+              <h3>
+                ⚠️ Erro
+              </h3>
+
+              <p>
+                Não foi possível carregar os pacientes.
+              </p>
+
+            </div>
+
+          `;
+
+        });
+
+    }
+
+
+    /* ==================================================
+       SELECIONAR CONSULTA
+    ================================================== */
+
+    function selecionarConsulta(index) {
+
+      const consulta =
+        consultas[index];
+
+
+      if (!consulta) {
+
+        alert(
+          "Consulta não encontrada."
+        );
+
+        return;
+
+      }
+
+
+      consultaSelecionada =
+        consulta;
+
+
+      document.getElementById(
+        "paciente"
+      ).value =
+        consulta.paciente || "";
+
+
+      document.getElementById(
+        "diagnostico"
+      ).value =
+        consulta.diagnostico || "";
+
+
+      document.getElementById(
+        "medicacao"
+      ).value =
+        consulta.medicacao || "";
+
+
+      document.getElementById(
+        "obs"
+      ).value =
+        consulta.obs || "";
+
+
+      document.getElementById(
+        "motivoAlta"
+      ).value = "";
+
+
+      document.getElementById(
+        "justificativaAlta"
+      ).value = "";
+
+
+      document.getElementById(
+        "btnPDF"
+      ).style.display =
+        "none";
+
+
+      document
+        .getElementById("areaAlta")
+        .scrollIntoView({
+
+          behavior:
+            "smooth",
+
+          block:
+            "center"
+
+        });
+
+    }
+
+
+    /* ==================================================
+       REGISTRAR ALTA
+    ================================================== */
+
+    function registrarAlta() {
+
+      if (!consultaSelecionada) {
+
+        alert(
+          "⚠️ Selecione um paciente primeiro."
+        );
+
+        return;
+
+      }
+
+
+      const motivoAlta =
+        document
+          .getElementById("motivoAlta")
+          .value;
+
+
+      const justificativaAlta =
+        document
+          .getElementById("justificativaAlta")
+          .value
+          .trim();
+
+
+      if (!motivoAlta) {
+
+        alert(
+          "⚠️ Selecione o motivo da alta."
+        );
+
+        return;
+
+      }
+
+
+      if (!justificativaAlta) {
+
+        alert(
+          "⚠️ Especifique o motivo da alta ou saída."
+        );
+
+        return;
+
+      }
+
+
+      const dados = {
+
+        consultaId:
+          consultaSelecionada.id,
+
+        paciente:
+          consultaSelecionada.paciente,
+
+        pacienteId:
+          consultaSelecionada.pacienteId ||
+          null,
+
+        motivoAlta:
+          motivoAlta,
+
+        justificativaAlta:
+          justificativaAlta
+
+      };
+
+
+      fetch("/alta", {
+
+        method:
+          "POST",
+
+        headers: {
+
+          "Content-Type":
+            "application/json"
+
+        },
+
+        body:
+          JSON.stringify(dados)
+
+      })
+
+      .then(response => {
+
+        return response.json()
+          .then(data => ({
+
+            ok:
+              response.ok,
+
+            data:
+              data
+
+          }));
+
+      })
+
+      .then(resultado => {
+
+        if (!resultado.ok) {
+
+          throw new Error(
+
+            resultado.data.erro ||
+            "Erro ao registrar alta."
+
+          );
+
+        }
+
+
+        const alta =
+          resultado.data.alta;
+
+
+        ultimaAltaId =
+          alta.id;
+
+
+        alert(
+          "✅ Alta registrada com sucesso!"
+        );
+
+
+        document.getElementById(
+          "btnPDF"
+        ).style.display =
+          "block";
+
+
+        carregarConsultas();
+
+      })
+
+      .catch(error => {
+
+        console.error(error);
+
+
+        alert(
+
+          "❌ Não foi possível registrar a alta.\n\n" +
+          error.message
+
+        );
+
+      });
+
+    }
+
+
+    /* ==================================================
+       BAIXAR PDF
+    ================================================== */
+
+    function baixarPDF() {
+
+      if (!ultimaAltaId) {
+
+        alert(
+          "⚠️ Nenhuma alta disponível para gerar PDF."
+        );
+
+        return;
+
+      }
+
+
+      window.open(
+
+        "/alta/" +
+        ultimaAltaId +
+        "/pdf",
+
+        "_blank"
+
+      );
+
+    }
+
+
+    /* ==================================================
+       ESCAPAR HTML
+    ================================================== */
+
+    function escaparHTML(texto) {
+
+      return String(texto ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    }
+
+
+    /* ==================================================
+       INICIALIZAÇÃO
+    ================================================== */
+
+    carregarConsultas();
+
+
+    setInterval(
+      carregarConsultas,
+      10000
+    );
+
+  </script>
+
+</body>
+
+</html>
+```
 
